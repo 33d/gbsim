@@ -7,5 +7,7 @@ int display_init();
 int display_update();
 int display_destroy();
 int display_update(const uint8_t ram[84*6]);
+int display_render();
+const char* display_error_message();
 
 #endif

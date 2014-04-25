@@ -50,6 +50,8 @@ static void pcd8544_handle_command(pcd8544_t* const p, uint8_t data) {
         } else
             PCD8544_ERROR(p, "Unhandled data");
     }
+
+    p->updated = 1;
 }
 
 static void pcd8544_handle_data(pcd8544_t* const p, uint8_t data) {
@@ -68,6 +70,8 @@ static void pcd8544_handle_data(pcd8544_t* const p, uint8_t data) {
             p->x = (p->x+1) % PCD8544_COLS;
         }
     }
+
+    p->updated = 1;
 }
 
 static void pcd8544_reset(pcd8544_t* p) {

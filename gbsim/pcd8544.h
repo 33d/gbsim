@@ -33,6 +33,7 @@ typedef struct pcd8544_t {
     int init_reset_state;
     int vop;
     int mode;
+    int updated;
     const char* error;
 } pcd8544_t;
 

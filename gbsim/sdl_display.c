@@ -53,6 +53,10 @@ int display_update(const uint8_t ram[84*6]) {
         }
         dest += 84*7;
     }
+    return 1;
+}
+
+int display_render() {
     SDL_UpdateTexture(display.texture, NULL, display.fb, 84);
 
     SDL_RenderClear(display.renderer);
