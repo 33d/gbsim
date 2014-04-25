@@ -29,6 +29,7 @@
 							<tool id="org.eclipse.cdt.build.core.settings.holder.1605608141" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
 								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.633207247" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${AVRLIBC}/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:${workspace_loc}/simavr/sim}&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.686693631" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__AVR_ATmega328P__"/>

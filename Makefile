@@ -9,7 +9,7 @@ RELEASE	?= 0
 
 .PHONY: doc
 
-all:	build-simavr build-tests build-examples
+all:	build-simavr build-tests build-examples build-gbsim
 
 build-simavr:
 	$(MAKE) -C simavr RELEASE=$(RELEASE)
@@ -19,6 +19,9 @@ build-tests: build-simavr
 
 build-examples: build-simavr
 	$(MAKE) -C examples RELEASE=$(RELEASE)
+
+build-gbsim: build-simavr
+	$(MAKE) -C gbsim RELEASE=$(RELEASE)
 
 install:
 	$(MAKE) -C simavr install RELEASE=$(RELEASE)
