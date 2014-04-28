@@ -15,20 +15,29 @@ typedef struct {
     SDL_Scancode key;
     int keypad_key;
     char port;
+    uint8_t avr_port; // only needed for the pull-up hack
     int pin;
 } keydef_t;
 
 static const keydef_t keydefs[] = {
-        { SDL_SCANCODE_W, GB_KEYPAD_UP,    'D', 1 },
-        { SDL_SCANCODE_A, GB_KEYPAD_LEFT,  'D', 0 },
-        { SDL_SCANCODE_S, GB_KEYPAD_DOWN,  'D', 3 },
-        { SDL_SCANCODE_D, GB_KEYPAD_RIGHT, 'D', 2 },
-        { SDL_SCANCODE_R, GB_KEYPAD_C,     'C', 3 },
-        { SDL_SCANCODE_K, GB_KEYPAD_A,     'D', 4 },
-        { SDL_SCANCODE_L, GB_KEYPAD_B,     'D', 2 },
+        { SDL_SCANCODE_W, GB_KEYPAD_UP,    'B', 5, 1 },
+        { SDL_SCANCODE_A, GB_KEYPAD_LEFT,  'B', 5, 0 },
+        { SDL_SCANCODE_S, GB_KEYPAD_DOWN,  'D', 11, 6 },
+        { SDL_SCANCODE_D, GB_KEYPAD_RIGHT, 'D', 11, 7 },
+        { SDL_SCANCODE_R, GB_KEYPAD_C,     'C', 8, 3 },
+        { SDL_SCANCODE_K, GB_KEYPAD_A,     'D', 11, 4 },
+        { SDL_SCANCODE_L, GB_KEYPAD_B,     'D', 11, 2 },
 };
 
 #define keydefs_length (sizeof(keydefs) / sizeof(keydef_t))
+
+// Hack: simavr tries to apply the pin value to the port when the pull-ups
+// are on, which upsets the key input.  I abuse the external pull-up
+// values to get around that.  (See avr_ioport_update_irqs in avr_ioport.c)
+static struct {
+    uint8_t* pull_value;
+    uint8_t pin_mask;
+} key_io[keydefs_length];
 
 static pcd8544_t lcd;
 static gb_keypad_t keypad;
@@ -41,28 +50,36 @@ static int keys;
 int avr_run_thread(void *ptr) {
     avr_t* avr = (avr_t*) ptr;
     int state = cpu_Running;
+    int old_keys = 0;
     do {
         int count = 10000;
         while (( state != cpu_Done ) && ( state != cpu_Crashed ) && --count > 0 )
             state = avr_run(avr);
+        SDL_LockMutex(lcd_ram_mutex);
         if (lcd.updated) {
-            SDL_LockMutex(lcd_ram_mutex);
             memcpy(lcd_ram, lcd.ram, sizeof(lcd_ram));
             lcd_updated = 1;
             lcd.updated = 0;
-            if (quit_flag) {
-                SDL_UnlockMutex(lcd_ram_mutex);
-                break;
-            }
-
-            int key_values = keys;
-            for (int i = 0; i < keydefs_length; i++) {
-                gb_keypad_press(&keypad, keydefs[i].keypad_key, (key_values & 1) == 0);
-                key_values >>= 1;
-            }
-
-            SDL_UnlockMutex(lcd_ram_mutex);
         }
+
+        if (quit_flag) {
+            SDL_UnlockMutex(lcd_ram_mutex);
+            break;
+        }
+
+        int k = keys;
+        SDL_UnlockMutex(lcd_ram_mutex);
+        for (int i = 0; i < keydefs_length; i++) {
+            if ((old_keys & (1<<i)) != (k & (1<<i))) {
+                const keydef_t* kd = keydefs + i;
+                if (k & (1<<i))
+                    *key_io[i].pull_value &= ~key_io[i].pin_mask;
+                else
+                    *key_io[i].pull_value |= key_io[i].pin_mask;
+                gb_keypad_press(&keypad, kd->keypad_key, (k & (1<<i)) ? 0 : 1);
+            }
+        }
+        old_keys = k;
     } while (state != cpu_Done && state != cpu_Crashed);
 
     return 0;
@@ -149,6 +166,14 @@ int main(int argc, const char* argv[]) {
         const keydef_t *k = keydefs + i;
         avr_connect_irq(keypad.irq + k->keypad_key,
                 avr_io_getirq(avr, AVR_IOCTL_IOPORT_GETIRQ(k->port), k->pin));
+
+        // Start with the pin high
+        avr_ioport_t* port = (avr_ioport_t*) avr->io[k->avr_port].w.param;
+        key_io[i].pin_mask = (1<<k->pin);
+        key_io[i].pull_value = &port->external.pull_value;
+        port->external.pull_mask |= key_io[i].pin_mask;
+        port->external.pull_value |= key_io[i].pin_mask;
+        gb_keypad_press(&keypad, k->keypad_key, 1);
     }
 
     if (display_init()) {
