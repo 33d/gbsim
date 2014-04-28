@@ -99,7 +99,9 @@ void main_loop() {
                 break;
             case SDL_KEYDOWN: {
                 SDL_Scancode key = e.key.keysym.scancode;
-                for (int i = 0; i < keydefs_length; i++) {
+                if (key == SDL_SCANCODE_ESCAPE)
+                    quit = 1;
+                else for (int i = 0; i < keydefs_length; i++) {
                     if (key == keydefs[i].key)
                         keys |= (1<<i);
                 }
