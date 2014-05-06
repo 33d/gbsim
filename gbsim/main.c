@@ -61,16 +61,35 @@ static int lcd_updated;
 static SDL_mutex* lcd_ram_mutex;
 static int quit_flag;
 static int keys;
+static struct {
+    uint32_t last_timer;
+    uint32_t last_avr_ticks;
+} rate;
 
 int avr_run_thread(void *ptr) {
     avr_t* avr = (avr_t*) ptr;
     int state = cpu_Running;
     int old_keys = 0;
+    rate.last_avr_ticks = rate.last_timer = 0;
     do {
         int count = 10000;
         while (( state != cpu_Done ) && ( state != cpu_Crashed ) && --count > 0 )
             state = avr_run(avr);
+
         SDL_LockMutex(lcd_ram_mutex);
+
+        // If a second has elapsed, update the rate
+        uint32_t timer = SDL_GetTicks();
+        if (timer - rate.last_timer > 1000) {
+            // How many kcycles should have elapsed
+            uint32_t calculated = (timer - rate.last_timer) * 16; // kcycles/ms
+            uint32_t actual = (avr->cycle - rate.last_avr_ticks) / 1000; // kcycles/ms
+            int percent_rate = 100 * actual / calculated;
+            display_rate(percent_rate);
+            rate.last_timer = timer;
+            rate.last_avr_ticks = avr->cycle;
+        }
+
         if (lcd.updated) {
             memcpy(lcd_ram, lcd.ram, sizeof(lcd_ram));
             lcd_updated = 1;

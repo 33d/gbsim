@@ -30,7 +30,7 @@ struct {
     SDL_Renderer* renderer;
     SDL_Texture* texture;
     SDL_Texture* numbers_texture;
-    char rate[5];
+    char rate[6];
     uint8_t fb[84*48];
 } display;
 
@@ -110,6 +110,10 @@ int display_render() {
 
     SDL_RenderPresent(display.renderer);
     return 1;
+}
+
+void display_rate(int rate) {
+    snprintf(display.rate, sizeof(display.rate), "%5d", rate);
 }
 
 int display_destroy() {
