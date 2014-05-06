@@ -63,32 +63,52 @@ static int quit_flag;
 static int keys;
 static struct {
     uint32_t last_timer;
-    uint32_t last_avr_ticks;
+    avr_cycle_count_t last_avr_ticks;
 } rate;
+
+void check_simulation_rate(const avr_t* avr) {
+    uint32_t timer = SDL_GetTicks();
+    uint32_t elapsed = timer - rate.last_timer;
+    // How many cycles *should* have elapsed
+    int32_t calculated = elapsed * 16000;
+    int32_t actual = (avr->cycle - rate.last_avr_ticks);
+    // Don't bother sleeping for <10 ms
+    if (actual - 320000 > calculated) {
+        SDL_Delay((actual - calculated) / 16000);
+        rate.last_timer = SDL_GetTicks();
+        rate.last_avr_ticks = avr->cycle;
+    }
+}
 
 int avr_run_thread(void *ptr) {
     avr_t* avr = (avr_t*) ptr;
     int state = cpu_Running;
     int old_keys = 0;
-    rate.last_avr_ticks = rate.last_timer = 0;
+    rate.last_avr_ticks = avr->cycle;
+    rate.last_timer = SDL_GetTicks();
+    uint32_t last_display_timer = rate.last_timer;
+    avr_cycle_count_t last_display_avr_ticks = avr->cycle;
+
     do {
         int count = 10000;
         while (( state != cpu_Done ) && ( state != cpu_Crashed ) && --count > 0 )
             state = avr_run(avr);
 
-        SDL_LockMutex(lcd_ram_mutex);
+        check_simulation_rate(avr);
 
-        // If a second has elapsed, update the rate
+        // Update the display rate if necessary
         uint32_t timer = SDL_GetTicks();
-        if (timer - rate.last_timer > 1000) {
+        if (timer - last_display_timer > 1000) {
             // How many kcycles should have elapsed
-            uint32_t calculated = (timer - rate.last_timer) * 16; // kcycles/ms
-            uint32_t actual = (avr->cycle - rate.last_avr_ticks) / 1000; // kcycles/ms
+            uint32_t calculated = (timer - last_display_timer) * 16000;
+            uint32_t actual = avr->cycle - last_display_avr_ticks;
             int percent_rate = 100 * actual / calculated;
             display_rate(percent_rate);
-            rate.last_timer = timer;
-            rate.last_avr_ticks = avr->cycle;
+            last_display_timer = timer;
+            last_display_avr_ticks = avr->cycle;
         }
+
+        SDL_LockMutex(lcd_ram_mutex);
 
         if (lcd.updated) {
             memcpy(lcd_ram, lcd.ram, sizeof(lcd_ram));
