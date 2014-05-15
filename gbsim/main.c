@@ -17,6 +17,7 @@
 #include <SDL2/SDL_assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "sim_avr.h"
 #include "sim_elf.h"
 #include "avr_ioport.h"
@@ -187,7 +188,7 @@ void main_loop() {
 	}
 }
 
-int main(int argc, const char* argv[]) {
+int main(int argc, char* argv[]) {
 	int r = 0;
 
 	elf_firmware_t f;
