@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "sim_avr.h"
+#include "sim_gdb.h"
 #include "sim_elf.h"
 #include "avr_ioport.h"
 #include "avr_spi.h"
@@ -191,13 +192,22 @@ void main_loop() {
 int main(int argc, char* argv[]) {
 	int r = 0;
 
-	elf_firmware_t f;
+	char* elf_file = NULL;
+	int gdb_port = 0;
 
-	if (argc < 2) {
+	for (char** arg = &argv[1]; *arg != NULL; ++arg) {
+		if (strcmp("-d", *arg) == 0)
+			gdb_port = atoi(*(++arg));
+		else
+			elf_file = *arg;
+	}
+	if (elf_file == NULL) {
 		fprintf(stderr, "Give me a .elf file to load\n");
 		return 1;
 	}
-	elf_read_firmware(argv[1], &f);
+
+	elf_firmware_t f;
+	elf_read_firmware(elf_file, &f);
 	avr_t* avr = avr_make_mcu_by_name("atmega328p");
 	if (!avr) {
 		fprintf(stderr, "Unsupported cpu atmega328p\n");
@@ -205,6 +215,10 @@ int main(int argc, char* argv[]) {
 	}
 
 	avr_init(avr);
+	if (gdb_port != 0) {
+		avr->gdb_port = gdb_port;
+		avr_gdb_init(avr);
+	}
 	avr->frequency = 16000000;
 	avr_load_firmware(avr, &f);
 
