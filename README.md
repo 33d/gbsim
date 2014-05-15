@@ -37,7 +37,7 @@ Keys
 Building
 ======
 
-You'll need [SDL 2](http://libsdl.org/).
+You'll need [SDL 2](http://libsdl.org/) and [libelf](http://www.mr511.de/software/english.html).
 
 simavr probably wants OpenGL, Glut and avr-gcc to build, but shouldn't be necessary.
 
@@ -45,7 +45,7 @@ Linux
 ------
 `make` should work fine.  The binary will be in `gbsim/[your-platform]`.  It dynamically links simavr, which could be annoying if you try moving it.
 
-Others
+Windows
 ------
 
-Maybe look at [simavr's instructions](https://gitorious.org/simavr/pages/GetStarted).  On Windows, [MinGW](http://mingw.org/) and [MSYS](http://mingw.org/wiki/MSYS) is probably your best bet; failing that, try [Cygwin](http://cygwin.com/).
+See https://github.com/33d/gbsim-win.
