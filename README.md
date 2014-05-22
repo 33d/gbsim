@@ -37,7 +37,7 @@ Keys
 Building
 ======
 
-You'll need [SDL 2](http://libsdl.org/) and [libelf](http://www.mr511.de/software/english.html).
+You'll need [SDL 2](http://libsdl.org/) and [libelf](http://www.mr511.de/software/english.html), and the headers from [avr-libc](http://www.nongnu.org/avr-libc/).
 
 simavr probably wants OpenGL, Glut and avr-gcc to build, but shouldn't be necessary.
 
