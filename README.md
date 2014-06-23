@@ -43,7 +43,7 @@ simavr probably wants OpenGL, Glut and avr-gcc to build, but shouldn't be necess
 
 Linux
 ------
-`make` should work fine.  The binary will be in `gbsim/[your-platform]`.  It dynamically links simavr, which could be annoying if you try moving it.
+`make` should work fine.  The binary will be in `gbsim/[your-platform]`.  It dynamically links simavr, which could be annoying if you try moving it.  For Debian/Ubuntu, the dependencies are `libsdl2-dev`, `avr-libc` and `libelfg0-dev`.
 
 Windows
 ------
