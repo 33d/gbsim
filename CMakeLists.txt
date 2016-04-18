@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.4)
 project (gbsim)
 
 # Don't include simavr - the sim_core_decl.h in there was auto-generated,
@@ -48,6 +48,9 @@ file(MAKE_DIRECTORY build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY build)
 
 add_executable(gbsim ${SOURCES})
+if(WIN32)
+  target_link_libraries(gbsim wsock32 ws2_32)
+endif()
 
 include(FindPkgConfig)
 pkg_search_module(SDL2 REQUIRED sdl2)

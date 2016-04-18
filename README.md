@@ -37,15 +37,19 @@ Keys
 Building
 ======
 
-You'll need [SDL 2](http://libsdl.org/) and [libelf](http://www.mr511.de/software/english.html), and the headers from [avr-libc](http://www.nongnu.org/avr-libc/).
+You'll need [SDL 2](http://libsdl.org/) and [libelf](http://www.mr511.de/software/english.html).
 
-simavr probably wants OpenGL, Glut and avr-gcc to build, but shouldn't be necessary.
+simavr probably wants OpenGL, and Glut to build, but shouldn't be necessary.
 
 Linux
 ------
-`make` should work fine.  The binary will be in `gbsim/[your-platform]`.  It dynamically links simavr, which could be annoying if you try moving it.  For Debian/Ubuntu, the dependencies are `libsdl2-dev`, `avr-libc` and `libelfg0-dev`.
+    $ cmake .
+    $ make
+
+The binary will be in `build/[your-platform]`.    For Debian/Ubuntu, the dependencies are `libsdl2-dev` and `libelfg0-dev`.
 
 Windows
 ------
 
-See https://github.com/33d/gbsim-win.
+See [README.windows.md](README.windows.md).
+
