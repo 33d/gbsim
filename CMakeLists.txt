@@ -1,6 +1,15 @@
 cmake_minimum_required (VERSION 2.8.4)
 project (gbsim)
 
+# set c version to gnu99
+if (CMAKE_VERSION VERSION_LESS "3.1")
+	if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+	  set (CMAKE_C_FLAGS "--std=gnu99 ${CMAKE_C_FLAGS}")
+	endif ()
+else ()
+	set (CMAKE_C_STANDARD 99)
+endif ()
+
 # Don't include simavr - the sim_core_decl.h in there was auto-generated,
 # so use the manually created one in include instead
 include_directories(
