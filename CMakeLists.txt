@@ -9,6 +9,11 @@ include_directories(
 	include
 )
 
+# We should benefit from SSE
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+	set(CMAKE_C_FLAGS "-O3 -march=pentium4")
+endif()
+
 set(SOURCES
 	# Add only the cores we'll actually use (and see include/sim_core_config.h)
 	simavr/cores/sim_mega328.c
