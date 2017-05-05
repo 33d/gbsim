@@ -48,6 +48,16 @@ Linux
 
 The binary will be in `build/[your-platform]`.    For Debian/Ubuntu, the dependencies are `libsdl2-dev` and `libelfg0-dev`.
 
+MacOS
+------
+
+I'm [told that this works](https://github.com/33d/gbsim/issues/3):
+
+    brew install sdl2
+    brew install libelf
+    cmake .
+    make
+
 Windows
 ------
 
